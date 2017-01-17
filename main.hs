@@ -7,7 +7,7 @@ str = "hello my name is bibek pandey haha"
 sa = suffixArray $ words str
 lst = suffixArraytoList sa
 
-nums = [1,2,3,3,3,3,4,4,9]
+nums = [1,2,2,4,4,4,4,4,9,9,9,9,9]
 
 main = do
-    putStrLn $ show $ binaryGetCount 4 nums 0 (length nums - 1)
+    putStrLn $ show $ binaryGetCount 2 nums 0 (length nums - 1)

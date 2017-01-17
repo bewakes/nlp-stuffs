@@ -64,22 +64,24 @@ binaryGetCountAs cfunc elem list l u
           left = leftMargin elem list 0 indx
           right = rightMargin elem list indx u
           leftMargin e lst l u -- u has the element
-            | l==u = u
-            | otherwise = let midIndex = (l+u) `div` 2
-                              midElem = lst !! midIndex
-                          in case elem `cfunc` midElem of
-                            EQ -> leftMargin e lst l midIndex
-                            LT -> leftMargin e lst midIndex u
+            | u-l==1 && lst!!l ==elem  = l
+            | u-l==1 && lst!!l /= elem = u
+            | otherwise = let midElem = lst !! midIndex
+                          in case midElem `cfunc` e of
+                            EQ -> leftMargin e lst l (midIndex-1)
+                            LT -> leftMargin e lst (midIndex+1) u
                             GT -> 0 -- this is error, right now don't know what to do
+            where midIndex = (l+u) `div` 2
 
           rightMargin e lst l u -- l has the element
-            | l==u = u
-            | otherwise = let midIndex = (l+u) `div` 2
-                              midElem = lst !! midIndex
-                          in case elem `cfunc` midElem of
-                            EQ -> rightMargin e lst midIndex u
-                            GT -> rightMargin e lst l midIndex
+            | u-l==1 && lst!!u ==elem = u
+            | u-l==1 && lst!!u /= elem = l
+            | otherwise = let midElem = lst !! midIndex
+                          in case midElem `cfunc` e of
+                            EQ -> rightMargin e lst (midIndex+1) u
+                            GT -> rightMargin e lst l (midIndex-1)
                             LT -> 0 -- this is error, right now don't know what to do
+            where midIndex = (l+u) `div` 2
 
 binaryGetCount :: Ord a => a -> [a] -> Int -> Int -> Int
 binaryGetCount elem list l u = binaryGetCountAs compare elem list l u
