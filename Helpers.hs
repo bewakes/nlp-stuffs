@@ -66,9 +66,10 @@ binaryGetCountAs cfunc elem list l u
           leftMargin e lst l u -- u has the element
             | u-l==1 && lst!!l ==elem  = l
             | u-l==1 && lst!!l /= elem = u
+            | u==l  = l
             | otherwise = let midElem = lst !! midIndex
                           in case midElem `cfunc` e of
-                            EQ -> leftMargin e lst l (midIndex-1)
+                            EQ -> leftMargin e lst l (midIndex)
                             LT -> leftMargin e lst (midIndex+1) u
                             GT -> 0 -- this is error, right now don't know what to do
             where midIndex = (l+u) `div` 2
@@ -76,9 +77,10 @@ binaryGetCountAs cfunc elem list l u
           rightMargin e lst l u -- l has the element
             | u-l==1 && lst!!u ==elem = u
             | u-l==1 && lst!!u /= elem = l
+            | u==l  = u
             | otherwise = let midElem = lst !! midIndex
                           in case midElem `cfunc` e of
-                            EQ -> rightMargin e lst (midIndex+1) u
+                            EQ -> rightMargin e lst (midIndex) u
                             GT -> rightMargin e lst l (midIndex-1)
                             LT -> 0 -- this is error, right now don't know what to do
             where midIndex = (l+u) `div` 2
