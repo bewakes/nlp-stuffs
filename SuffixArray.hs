@@ -4,6 +4,7 @@ module SuffixArray (
     , suffixArraytoList
     , binarySearchSA
     , getNgramCount
+    , compareSAElements
 ) where
 
 import BinaryTree( Tree(EmptyTree), treeInsertAs, depthFirstList)
@@ -25,23 +26,20 @@ suffixArray lst = SuffixArray vec (V.fromList dfsList)
           compfn = compareElemsByIndex vec
           vec = V.fromList lst
 
----------------------------
--- TODO -------------------
--- implement binary search (bounded/unbounded)
 
-suffixArraytoList :: SuffixArray a -> [[a]]
-suffixArraytoList (SuffixArray d v) = V.foldr listAt [] v
+suffixArraytoList :: SuffixArray a -> V.Vector [a]
+suffixArraytoList (SuffixArray d v) = V.fromList $ V.foldr listAt [] v
     where listAt i l = V.toList (V.drop i d) : l
 
 -- comparison function for binary search in SA
-cmpfn a b = a `compare` (take (length a) b)
+compareSAElements a b = a `compare` (take (length a) b)
 
 -- Binary search
 binarySearchSA :: Ord a => [a] -> SuffixArray a -> Int
-binarySearchSA elem sa = binarySearchAs cmpfn elem lst 0 (length lst)
+binarySearchSA elem sa = binarySearchAs compareSAElements elem lst 0 (length lst)
     where lst = suffixArraytoList sa
 
 getNgramCount :: Ord a => [a] -> SuffixArray a -> Int
-getNgramCount elem sa = binaryGetCountAs cmpfn elem lst 0 len
+getNgramCount elem sa = binaryGetCountAs compareSAElements elem lst 0 (len-1)
     where lst = suffixArraytoList sa
-          len = length lst
+          len = V.length lst

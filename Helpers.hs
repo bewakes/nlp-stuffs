@@ -6,10 +6,20 @@ module Helpers(
     , binarySearch
     , binaryGetCountAs
     , binaryGetCount
+    , strLower
 )
 where
 
 import Data.Map
+import Data.Char
+import qualified Data.Vector as V
+
+-----------------------------------------------------
+-- String manipulation
+-- --------------------------------------------------
+strLower :: String -> String
+strLower [] = []
+strLower (x:xs) = (toLower x) : (strLower xs)
 
 -----------------------------------------------------
 -- Function for extracting elements after nth element
@@ -40,22 +50,22 @@ freqList = Prelude.foldl countElem empty
 -- BINARY SEARCH --
 --------------------------
 -- This takes equality function to compare
-binarySearchAs :: Ord a => (a -> a -> Ordering) -> a -> [a] ->Int -> Int -> Int
+binarySearchAs :: Ord a => (a -> a -> Ordering) -> a -> V.Vector a ->Int -> Int -> Int
 binarySearchAs cfunc elem list l u
-    | list == [] = -1
+    | V.null list == True  = -1
     | u < l = -1
     | otherwise = case elem `cfunc` midElem of
         EQ -> midIndex
         LT -> binarySearchAs cfunc elem list l (midIndex-1)
         GT -> binarySearchAs cfunc elem list (midIndex+1) u
     where midIndex = (l + u) `div` 2
-          midElem = list !! midIndex
+          midElem = list V.! midIndex
 
-binarySearch :: Ord a => a -> [a] -> Int -> Int -> Int
+binarySearch :: Ord a => a -> V.Vector a -> Int -> Int -> Int
 binarySearch e ls l h = binarySearchAs compare e ls l h
 
 -- TODO: fix bug
-binaryGetCountAs :: Ord a => (a -> a -> Ordering) -> a -> [a] -> Int -> Int -> Int
+binaryGetCountAs :: Ord a => (a -> a -> Ordering) -> a -> V.Vector a -> Int -> Int -> Int
 binaryGetCountAs cfunc elem list l u
     | indx == -1 = 0
     | otherwise = right - left + 1
@@ -64,26 +74,26 @@ binaryGetCountAs cfunc elem list l u
           left = leftMargin elem list 0 indx
           right = rightMargin elem list indx u
           leftMargin e lst l u -- u has the element
-            | u-l==1 && lst!!l ==elem  = l
-            | u-l==1 && lst!!l /= elem = u
+            | u-l==1 && lst V.! l ==elem  = l
+            | u-l==1 && lst V.! l /= elem = u
             | u==l  = l
-            | otherwise = let midElem = lst !! midIndex
-                          in case midElem `cfunc` e of
+            | otherwise = let midElem = lst V.! midIndex
+                          in case e `cfunc` midElem of
                             EQ -> leftMargin e lst l (midIndex)
-                            LT -> leftMargin e lst (midIndex+1) u
-                            GT -> 0 -- this is error, right now don't know what to do
-            where midIndex = (l+u) `div` 2
-
-          rightMargin e lst l u -- l has the element
-            | u-l==1 && lst!!u ==elem = u
-            | u-l==1 && lst!!u /= elem = l
-            | u==l  = u
-            | otherwise = let midElem = lst !! midIndex
-                          in case midElem `cfunc` e of
-                            EQ -> rightMargin e lst (midIndex) u
-                            GT -> rightMargin e lst l (midIndex-1)
+                            GT -> leftMargin e lst (midIndex+1) u
                             LT -> 0 -- this is error, right now don't know what to do
             where midIndex = (l+u) `div` 2
 
-binaryGetCount :: Ord a => a -> [a] -> Int -> Int -> Int
+          rightMargin e lst l u -- l has the element
+            | u-l==1 && lst V.! u ==elem = u
+            | u-l==1 && lst V.! u /= elem = l
+            | u==l  = u
+            | otherwise = let midElem = lst V.! midIndex
+                          in case e `cfunc` midElem of
+                            EQ -> rightMargin e lst (midIndex) u
+                            LT -> rightMargin e lst l (midIndex-1)
+                            GT -> 0 -- this is error, right now don't know what to do
+            where midIndex = (l+u) `div` 2
+
+binaryGetCount :: Ord a => a -> V.Vector a -> Int -> Int -> Int
 binaryGetCount elem list l u = binaryGetCountAs compare elem list l u
