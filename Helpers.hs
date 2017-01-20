@@ -74,8 +74,8 @@ binaryGetCountAs cfunc elem list l u
           left = leftMargin elem list 0 indx
           right = rightMargin elem list indx u
           leftMargin e lst l u -- u has the element
-            | u-l==1 && lst V.! l ==elem  = l
-            | u-l==1 && lst V.! l /= elem = u
+            | u-l==1 && elem `cfunc` (lst V.! l) == EQ = l
+            | u-l==1 && elem `cfunc` (lst V.! l) == LT = u
             | u==l  = l
             | otherwise = let midElem = lst V.! midIndex
                           in case e `cfunc` midElem of
@@ -85,8 +85,8 @@ binaryGetCountAs cfunc elem list l u
             where midIndex = (l+u) `div` 2
 
           rightMargin e lst l u -- l has the element
-            | u-l==1 && lst V.! u ==elem = u
-            | u-l==1 && lst V.! u /= elem = l
+            | u-l==1 && elem `cfunc` (lst V.! u) == EQ = u
+            | u-l==1 && elem `cfunc` (lst V.! u) == GT = l
             | u==l  = u
             | otherwise = let midElem = lst V.! midIndex
                           in case e `cfunc` midElem of

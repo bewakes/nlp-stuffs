@@ -36,7 +36,7 @@ compareSAElements a b = a `compare` (take (length a) b)
 
 -- Binary search
 binarySearchSA :: Ord a => [a] -> SuffixArray a -> Int
-binarySearchSA elem sa = binarySearchAs compareSAElements elem lst 0 (length lst)
+binarySearchSA elem sa = binarySearchAs compareSAElements elem lst 0 (length lst - 1)
     where lst = suffixArraytoList sa
 
 getNgramCount :: Ord a => [a] -> SuffixArray a -> Int
