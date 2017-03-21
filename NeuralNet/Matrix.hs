@@ -28,6 +28,10 @@ identityMatrix n = Matrix (V.fromList $ getRows 0 n)
           booltoint v | v==True = 1
                       | otherwise = 0
 
+-- Matrix from list
+matrixFromList :: [[a]] -> Matrix a
+matrixFromList lst = Matrix (V.fromList $ map V.fromList lst)
+
 -- TODO: random element matrix
 
 instance (Show a) => Show (Matrix a) where
@@ -43,17 +47,16 @@ instance (Num a) => Num (Matrix a) where
     where sumrows (a, b) = V.map addZipped $ V.zip a b
           addZipped (a, b) = a Prelude.+ b
 -- multiplication of matrices
-mat1@(Matrix m1) * mat2@(Matrix m2) = [ [mult x y | y <- cols mat2] | x <- matToLst mat1]
+mat1 * mat2 = [ [mult x y | y <- cols mat2] | x <- matToLst mat1]
     where mult a b = sum $ V.map (\(x,y)->x Prelude.* y) $ V.zip a b
-          cols mat@(Matrix m) = matToLst $transpose mat
-          matToLst mat@(Matrix m) = V.toList m
+          cols mat = matToLst $transpose mat
+          matToLst (Matrix m) = V.toList m
 
 
 -- transpose of a matrix
 transpose :: Matrix a -> Matrix a
 transpose (Matrix m) = Matrix $ V.fromList $ getCols (V.toList m) 0
     where getCols mat ind
-            | V.length m < ind = []
-            | otherwise = (V.fromList $ map (V.! ind) mat) : getCols mat (ind Prelude.+ 1)
-
-
+            | V.length row > ind = (V.fromList $ map (V.! ind) mat) : getCols mat (ind Prelude.+ 1)
+            | otherwise = []
+          row = V.head m
