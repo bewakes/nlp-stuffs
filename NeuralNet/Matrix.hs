@@ -24,13 +24,17 @@ identityMatrix n = Matrix (V.fromList $ getRows 0 n)
     where getRows ind size
             | ind >=size = []
             | otherwise = V.fromList (oneAtPos ind size) : getRows (ind Prelude.+ 1) size
-          oneAtPos pos size = [booltoint (x == pos) | x <- [0..(size-1)]]
+          oneAtPos pos size = [booltoint (x == pos) | x <- [0..(size Prelude.-1)]]
           booltoint v | v==True = 1
                       | otherwise = 0
 
 -- Matrix from list
 matrixFromList :: [[a]] -> Matrix a
 matrixFromList lst = Matrix (V.fromList $ map V.fromList lst)
+
+-- scale matrix
+scale :: (Num a) => Matrix a -> a -> Matrix a
+scale (Matrix m) f = Matrix (V.map (\x-> V.map (Prelude.* f) x) m)
 
 -- TODO: random element matrix
 
@@ -52,6 +56,9 @@ mat1 * mat2 = [ [mult x y | y <- cols mat2] | x <- matToLst mat1]
           cols mat = matToLst $transpose mat
           matToLst (Matrix m) = V.toList m
 
+(-) :: (Num a) => Matrix a -> Matrix a -> Matrix a
+(Matrix m1) - (Matrix m2) = (Matrix m1) Matrix.+ negative
+    where negative = scale (Matrix m2) (Prelude.- 1)
 
 -- transpose of a matrix
 transpose :: Matrix a -> Matrix a
