@@ -56,9 +56,9 @@ mat1 * mat2 = [ [mult x y | y <- cols mat2] | x <- matToLst mat1]
           cols mat = matToLst $transpose mat
           matToLst (Matrix m) = V.toList m
 
-(-) :: (Num a) => Matrix a -> Matrix a -> Matrix a
-(Matrix m1) - (Matrix m2) = (Matrix m1) Matrix.+ negative
-    where negative = scale (Matrix m2) (Prelude.- 1)
+(Matrix m1) - (Matrix m2) = Matrix $ V.map diffrows (V.zip m1 m2)
+    where diffrows (a, b) = V.map subtractZipped $ V.zip a b
+          subtractZipped (a, b) = a Prelude.- b
 
 -- transpose of a matrix
 transpose :: Matrix a -> Matrix a
