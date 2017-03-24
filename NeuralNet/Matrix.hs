@@ -1,4 +1,4 @@
-module Matrix ()
+module Matrix (Matrix(..))
 where
 
 import qualified Data.Vector as V
@@ -51,7 +51,8 @@ instance (Num a) => Num (Matrix a) where
     where sumrows (a, b) = V.map addZipped $ V.zip a b
           addZipped (a, b) = a Prelude.+ b
 -- multiplication of matrices
-mat1 * mat2 = [ [mult x y | y <- cols mat2] | x <- matToLst mat1]
+(*) :: (Num a) => Matrix a -> Matrix a -> Matrix a
+mat1 * mat2 = Matrix $ V.fromList [ V.fromList [mult x y | y <- cols mat2] | x <- matToLst mat1]
     where mult a b = sum $ V.map (\(x,y)->x Prelude.* y) $ V.zip a b
           cols mat = matToLst $transpose mat
           matToLst (Matrix m) = V.toList m
