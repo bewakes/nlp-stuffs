@@ -59,3 +59,5 @@ evaluate (inputs, outputs) nw = V.sum $ V.map (\(x,y)-> boolToInt (x==y)) result
 
 -- | backpropagate
 -- |  - returns tuple grad_b, grad_w representing gradient of C wrt wts and b
+backpropagate :: Network -> Matrix Float -> Matrix Float -> ([Matrix Float], [Matrix Float])
+backpropagate network input output = 

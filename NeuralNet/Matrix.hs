@@ -15,6 +15,10 @@ createMatrix :: Int -> Int -> a -> Matrix a
 createMatrix r c v = Matrix $ V.fromList (
         take r ( repeat (V.fromList ( take c ( repeat v)))))
 
+-- input is size (row,col) and value and fills matrix with the 'value'
+createMatrixBySize:: (Int, Int) -> a -> Matrix a
+createMatrixBySize (r,c) v = createMatrix r c v
+
 zeroMatrix :: Int -> Int -> Matrix Float
 zeroMatrix r c = createMatrix r c 0
 
