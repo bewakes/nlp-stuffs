@@ -58,4 +58,11 @@ evaluate (inputs, outputs) nw = V.sum $ V.map (\(x,y)-> boolToInt (x==y)) result
           desiredActualTuple (ip, op) = (feedforward nw ip, op)
 
 -- | backpropagate
--- |  - returns tuple grad_b, grad_w representing gradient of C wrt wts and b
+-- |  - takes input and desired output
+-- |  - returns tuple grad_b, grad_w representing gradient of C wrt biases and weights
+backpropagate :: Network -> Matrix Float -> Matrix Float -> ([Matrix Float], [Matrix Float])
+backpropagate network input output = (nabla_b, nabla_w)
+    where (zs, activations) = V.foldr calcZ ([],[input]) $ zip (biases network) (weights network)
+          calcZ (Z@(z:zs), A@(a:as)) (b, wt) = let wt_sum = (wt Matrix.* a) Matrix.+ b in (wt_sum:Z, sigmoidMat wt_sum:A)
+          lastDelta = hadamard (costDerivative (head activations) output) $ sigmoidMat' (head zs)
+          (nabla_b, nabla_w) = foldr evalBack (delta, delta Matrix.* (transpose (V.head (V.tail activations)))) $ V.zip3 (V.tail zs) (weights network) (activations) -- TODO
