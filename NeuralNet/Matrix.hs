@@ -15,12 +15,19 @@ createMatrix :: Int -> Int -> a -> Matrix a
 createMatrix r c v = Matrix $ V.fromList (
         take r ( repeat (V.fromList ( take c ( repeat v)))))
 
--- input is size (row,col) and value and fills matrix with the 'value'
-createMatrixBySize:: (Int, Int) -> a -> Matrix a
-createMatrixBySize (r,c) v = createMatrix r c v
+-- create matrix, input is size, a tuple (numrows, numcols)
+createMatrixBySize :: (Int,Int) -> a -> Matrix a
+createMatrixBySize (r, c) v = createMatrix r c v
 
 zeroMatrix :: Int -> Int -> Matrix Float
 zeroMatrix r c = createMatrix r c 0
+
+zeroMatrixBySize (r,c) = createMatrix r c
+
+-- HADAMARD product (element wise product)
+hadamard :: (Num a) => Matrix a -> Matrix a -> Matrix a
+hadamard (Matrix m1) (Matrix m2) = Matrix $ V.map row_mult (V.zip m1 m2)
+    where row_mult (r1, r2) = V.map (\(x,y) -> x Prelude.* y) $ V.zip r1 r2
 
 identityMatrix :: Int -> Matrix Float
 identityMatrix 0 = Matrix (V.fromList [])
@@ -29,8 +36,7 @@ identityMatrix n = Matrix (V.fromList $ getRows 0 n)
             | ind >=size = []
             | otherwise = V.fromList (oneAtPos ind size) : getRows (ind Prelude.+ 1) size
           oneAtPos pos size = [booltoint (x == pos) | x <- [0..(size Prelude.-1)]]
-          booltoint v | v==True = 1
-                      | otherwise = 0
+          booltoint v = if v==True then 1 else 0
 
 -- Matrix from list
 matrixFromList :: [[a]] -> Matrix a
