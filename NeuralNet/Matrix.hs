@@ -1,4 +1,15 @@
-module Matrix (Matrix(..))
+module Matrix (
+    Matrix(..)
+    , (Matrix.*)
+    , (Matrix.+)
+    , (Matrix.-)
+    , hadamard
+    , transpose
+    , zeroMatrix
+    , zeroMatrixBySize
+    , scale
+    , size
+)
 where
 
 import qualified Data.Vector as V
@@ -22,7 +33,7 @@ createMatrixBySize (r, c) v = createMatrix r c v
 zeroMatrix :: Int -> Int -> Matrix Float
 zeroMatrix r c = createMatrix r c 0
 
-zeroMatrixBySize (r,c) = createMatrix r c
+zeroMatrixBySize (r,c) = zeroMatrix r c
 
 -- HADAMARD product (element wise product)
 hadamard :: (Num a) => Matrix a -> Matrix a -> Matrix a

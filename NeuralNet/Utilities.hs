@@ -1,4 +1,6 @@
 module Utilities(
+    sigmoidMat
+    , sigmoidMat'
 )
 where
 
@@ -6,7 +8,7 @@ import Data.Vector as V
 import Matrix
 
 sigmoid :: Float -> Float
-sigmoid z = 1 / (1 + exp (-z))
+sigmoid z = 1 / (1 Prelude.+ exp (-z))
 
 sigmoidMat :: Matrix Float -> Matrix Float
 sigmoidMat (Matrix m) = Matrix $ calcSigmoid $ m
@@ -20,3 +22,6 @@ sigmoidMat' :: Matrix Float -> Matrix Float
 sigmoidMat' (Matrix m) = Matrix $ V.map sigElem m
         where sigElem r = V.map sigmoid' r
 
+reverseV :: [a] -> [a]
+reverseV [] = []
+reverseV (x:xs) = reverseV xs Prelude.++ [x]
