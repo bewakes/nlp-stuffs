@@ -6,6 +6,7 @@ where
 
 import Data.Vector as V
 import Matrix
+import System.Random
 
 sigmoid :: Float -> Float
 sigmoid z = 1 / (1 Prelude.+ exp (-z))
@@ -25,3 +26,11 @@ sigmoidMat' (Matrix m) = Matrix $ V.map sigElem m
 reverseV :: [a] -> [a]
 reverseV [] = []
 reverseV (x:xs) = reverseV xs Prelude.++ [x]
+
+
+shuffle :: [a] -> [a]
+shuffle [] = []
+shuffle lst = []
+
+ran :: Float
+ran = Prelude.head $ (randoms (mkStdGen 100) :: [Float])

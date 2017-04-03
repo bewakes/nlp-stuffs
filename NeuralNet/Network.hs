@@ -3,10 +3,18 @@ module Network (
 )
 where
 
-import Matrix(Matrix(..), (*),(+),(-), hadamard,transpose, zeroMatrix, zeroMatrixBySize, size, scale)
-    --, (*)
-    --, (+)
---)
+import Matrix (
+        Matrix(..)
+        , (*)
+        , (+)
+        , (-)
+        , hadamard
+        , transpose
+        , zeroMatrix
+        , zeroMatrixBySize
+        , size
+        , scale
+    )
 import Utilities(sigmoidMat, sigmoidMat')
 import Data.Vector as V
 import Prelude as P
@@ -36,13 +44,14 @@ feedforward nw inpmat = feed inpmat (biases nw) (weights nw)
 
 -- | stochastic Gradient Descent
 -- |  - takes in: 
+-- |        network: network where training data is applied
 -- |        training_data: a tuple (x, y), x being input vector and y being desired output
 -- |        epochs: number of epochs
 -- |        minibatch_size: size of each minibatch as training all at once is slow
 -- |        eta: learning rate
 -- |        test_data: this is optional
---stochasticGD :: (Matrix m, Matrix m) -> Int -> Int -> Float -> Maybe (Matrix m, Matrix m) -> Network
---stochasticGD tr_d ep mb_sz et tst_d = runepochs ep
+stochasticGD :: Network -> [(Matrix m, Matrix m)] -> Int -> Int -> Float -> Maybe (Matrix m, Matrix m) -> Network
+stochasticGD tr_d ep mb_sz et tst_d = runepochs ep
 
 -- | updateMiniBatch
 -- |  - update the weights and biases of the network applying backpropagation
@@ -88,9 +97,13 @@ backpropagate network input output = (nabla_b, nabla_w)
 
           calcZ ( (z:zs), (a:as)) (b, wt) = let wt_sum = (wt Matrix.* a) Matrix.+ b in (wt_sum:(z:zs), (sigmoidMat wt_sum):(a:as))
 
+
           lastDelta = hadamard (costDerivative (P.head activations) output) $ sigmoidMat' (P.head zs)
-          (nabla_b, nabla_w) = P.foldl evalBack ([lastDelta], [last_nabla_w]) $ P.zip3 (P.tail zs) (P.reverse (weights network)) (P.tail activations)
+          (nabla_b, nabla_w) = P.foldl evalBack ([lastDelta], [last_nabla_w]) $ P.zip3 (P.tail zs) wts actvns
+
+          wts = P.reverse (weights network)
           -- both zs and activations are in reverse but weights are not, so reversing weights
+          actvns = P.tail activations
 
           last_nabla_w = lastDelta Matrix.* secondLastActv'
           secondLastActv' = transpose (P.head (P.tail activations))
