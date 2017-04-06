@@ -18,6 +18,7 @@ import Matrix (
 import Utilities(sigmoidMat, sigmoidMat')
 import Data.Vector as V
 import Prelude as P
+import System.Random
 
 
 data Network = Network {
@@ -28,9 +29,19 @@ data Network = Network {
 }
 
 -- | Network constructor,  takes in layerSizes, initializes biases and weights
--- |    returns Network
--- network :: [Int] -> Network
--- network 
+-- |    returns IO Network (because of random numbers
+network :: [Int] -> IO Network
+network neuroList = fmap cons ioTupleWtsBias
+    where cons (wts, bias) = Network
+                {
+                    layerSizes = neuroList
+                    , biases = bias
+                    , weights = wts
+                    , numLayers = length neuroList
+                }
+          wtSizes = 
+          weights = 
+          ioTupleWtsBias = 
 
 
 -- | feedforward function
