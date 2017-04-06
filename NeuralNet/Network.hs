@@ -15,7 +15,7 @@ import Matrix (
         , size
         , scale
     )
-import Utilities(sigmoidMat, sigmoidMat')
+import Utilities(sigmoidMat, sigmoidMat', randomMatrixBySize, listToMonad)
 import Data.Vector as V
 import Prelude as P
 import System.Random
@@ -26,7 +26,7 @@ data Network = Network {
     biases :: [Matrix Float],
     weights :: [Matrix Float],
     numLayers :: Int
-}
+} deriving (Show)
 
 -- | Network constructor,  takes in layerSizes, initializes biases and weights
 -- |    returns IO Network (because of random numbers
@@ -37,11 +37,16 @@ network neuroList = fmap cons ioTupleWtsBias
                     layerSizes = neuroList
                     , biases = bias
                     , weights = wts
-                    , numLayers = length neuroList
+                    , numLayers = P.length neuroList
                 }
-          wtSizes = 
-          weights = 
-          ioTupleWtsBias = 
+          wtSizes = P.zip (P.tail neuroList) (neuroList)
+          weights = listToMonad (P.map randomMatrixBySize wtSizes)
+          biasSzs = P.zip (P.tail neuroList) [1,1..]
+          biases = listToMonad (P.map randomMatrixBySize biasSzs)
+          ioTupleWtsBias = do
+            w <- weights
+            b <- biases
+            return (w, b)
 
 
 -- | feedforward function
@@ -61,8 +66,8 @@ feedforward nw inpmat = feed inpmat (biases nw) (weights nw)
 -- |        minibatch_size: size of each minibatch as training all at once is slow
 -- |        eta: learning rate
 -- |        test_data: this is optional
-stochasticGD :: Network -> [(Matrix m, Matrix m)] -> Int -> Int -> Float -> Maybe (Matrix m, Matrix m) -> Network
-stochasticGD tr_d ep mb_sz et tst_d = runepochs ep
+-- stochasticGD :: Network -> [(Matrix m, Matrix m)] -> Int -> Int -> Float -> Maybe (Matrix m, Matrix m) -> Network
+-- stochasticGD tr_d ep mb_sz et tst_d = runepochs ep
 
 -- | updateMiniBatch
 -- |  - update the weights and biases of the network applying backpropagation

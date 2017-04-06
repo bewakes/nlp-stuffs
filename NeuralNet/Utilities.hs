@@ -1,6 +1,9 @@
 module Utilities(
     sigmoidMat
     , sigmoidMat'
+    , random2DList
+    , randomMatrixBySize
+    , listToMonad
 )
 where
 
@@ -50,3 +53,36 @@ swap lst a b
                     P.++ (P.take (b P.- a P.- 1) (P.drop (a P.+ 1) lst))
                     P.++ [lst P.!! a]
                     P.++ (P.drop (b P.+ 1) lst)
+
+
+-- random list
+randomList :: Int -> IO ([Float])
+randomList 0 = return []
+randomList n = do
+    x <- randomIO :: IO Float
+    xs <- randomList (n P.- 1)
+    return (x:xs)
+
+random2DList :: Int -> Int -> IO([[Float]])
+random2DList r c = getLists r
+    where getLists 0 = return []
+          getLists n = do
+            x <- randomList c
+            xs <- getLists (n P.- 1)
+            return (x:xs)
+--
+-- random Matrix
+randomMatrix :: Int -> Int -> IO (Matrix Float)
+randomMatrix r c = fmap listToMatrix (random2DList r c)
+    where listToMatrix  lst = Matrix (V.fromList $ P.map V.fromList lst)
+
+randomMatrixBySize :: (Int, Int) -> IO (Matrix Float)
+randomMatrixBySize (r, c) = randomMatrix r c
+
+-- list of monads to monad list
+listToMonad :: (Monad m) => [m a] -> m ([a])
+listToMonad [] = return []
+listToMonad (x:xs) = do
+    xx <- x
+    xxs <- listToMonad xs
+    return (xx:xxs)
