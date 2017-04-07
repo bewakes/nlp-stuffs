@@ -4,6 +4,7 @@ module Utilities(
     , random2DList
     , randomMatrixBySize
     , listToMonad
+    , shuffle
 )
 where
 

@@ -15,7 +15,7 @@ import Matrix (
         , size
         , scale
     )
-import Utilities(sigmoidMat, sigmoidMat', randomMatrixBySize, listToMonad)
+import Utilities(sigmoidMat, sigmoidMat', randomMatrixBySize, listToMonad, shuffle)
 import Data.Vector as V
 import Prelude as P
 import System.Random
@@ -66,8 +66,26 @@ feedforward nw inpmat = feed inpmat (biases nw) (weights nw)
 -- |        minibatch_size: size of each minibatch as training all at once is slow
 -- |        eta: learning rate
 -- |        test_data: this is optional
--- stochasticGD :: Network -> [(Matrix m, Matrix m)] -> Int -> Int -> Float -> Maybe (Matrix m, Matrix m) -> Network
--- stochasticGD tr_d ep mb_sz et tst_d = runepochs ep
+stochasticGD :: Network -> [(Matrix Float, Matrix Float)] -> Int -> Int -> Float -> Maybe [(Matrix Float, Matrix Float)] -> IO Network
+stochasticGD nw tr_d ep mb_sz et tst_d = runepochs nw ep
+    where runepochs nt 0 = return nt
+          runepochs nt e = do
+            shuffled <- shuffle tr_d
+            batches <- return (splitBySize shuffled mb_sz)
+            net <- return $ P.foldl (\nn bat -> updateMiniBatch nn bat et) nt batches
+            evaluate_test tst_d net
+            runepochs net (e P.- 1)
+          evaluate_test testdata nn = if testdata == Nothing || (maybeToVal testdata) == [] then return ".." else do
+            d <- return $ maybeToVal testdata
+            n <- return $ evaluate d nn
+            putStrLn$ show n P.++ (show (P.length d))
+            return ""
+          splitBySize [] _ = []
+          splitBySize l n = (P.take n l) : (splitBySize (P.drop n l) n)
+          maybeToVal Nothing = []
+          maybeToVal (Just x) = x
+
+
 
 -- | updateMiniBatch
 -- |  - update the weights and biases of the network applying backpropagation
@@ -98,10 +116,10 @@ costDerivative outputActivations y = outputActivations Matrix.- y
 
 -- | evaluate
 -- |  - returns the number of test inputs for which the output is correct
-evaluate :: ([Matrix Float], [Matrix Float]) -> Network -> Int
-evaluate (inputs, outputs) nw = P.sum $ P.map (\(x,y)-> boolToInt (x==y)) result
+evaluate :: [(Matrix Float, Matrix Float)] -> Network -> Int
+evaluate list nw = P.sum $ P.map (\(x,y)-> boolToInt (x==y)) result
     where boolToInt x = if x==True then 1 else 0
-          result = P.map desiredActualTuple $ P.zip inputs outputs
+          result = P.map desiredActualTuple list
           desiredActualTuple (ip, op) = (feedforward nw ip, op)
 
 -- | backpropagate
