@@ -9,6 +9,7 @@ module Matrix (
     , zeroMatrixBySize
     , scale
     , size
+    , matrixFromList
 )
 where
 

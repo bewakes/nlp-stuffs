@@ -1,5 +1,8 @@
 module Network (
     Network(..)
+    , network
+    , stochasticGD
+    , feedforward
 )
 where
 
@@ -19,6 +22,7 @@ import Utilities(sigmoidMat, sigmoidMat', randomMatrixBySize, listToMonad, shuff
 import Data.Vector as V
 import Prelude as P
 import System.Random
+import System.IO.Unsafe (unsafePerformIO)
 
 
 data Network = Network {
@@ -129,7 +133,9 @@ backpropagate :: Network -> Matrix Float -> Matrix Float -> ([Matrix Float], [Ma
 backpropagate network input output = (nabla_b, nabla_w)
     where (zs, activations) = P.foldl calcZ ([],[input]) $ P.zip (biases network) (weights network)
 
-          calcZ ( (z:zs), (a:as)) (b, wt) = let wt_sum = (wt Matrix.* a) Matrix.+ b in (wt_sum:(z:zs), (sigmoidMat wt_sum):(a:as))
+          calcZ ( (zz), (a:as)) (b, wt) = let
+                wt_sum = (wt Matrix.* a) Matrix.+ b
+            in (wt_sum:zz, (sigmoidMat wt_sum):(a:as))
 
 
           lastDelta = hadamard (costDerivative (P.head activations) output) $ sigmoidMat' (P.head zs)
