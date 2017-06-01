@@ -1,5 +1,8 @@
-*
-!.gitignore
-!data/
-!*.hs
-!NeuralNet
+main
+*.hi
+*.o
+.brotasks/
+Main
+data/
+IDXReader
+IDXReader.hs
