@@ -3,6 +3,6 @@ main
 *.o
 .brotasks/
 Main
-data/
+!data/
 IDXReader
 IDXReader.hs

@@ -8,16 +8,17 @@ from itertools import product
 ######################################################################
 
 STOP = '$'
+PAUSE = ','
 
 class POSTagger():
-    def __init__(self, tagslist, vocab, corpus):
+    def __init__(self, corpus, vocab=[]):
         """
         Initialize the POS tagger
         - taglist: list of all the tags used, including 'STOP' and beginning '*'
         - vocab: this is probably generated from corpus
         - corpus: list of (word, tag) pairs (hopefully)
         """
-        self._tags = ['*'] + tagslist
+        #self._tags = ['*'] + tagslist
         self._vocab = vocab
         self._corpus = corpus
         self._tag_bigrams = list(product(self._tags, self._tags))
@@ -28,6 +29,7 @@ class POSTagger():
         self._tag_bigram_counts = {}
         # create a probability distribution
         self._update_counts(vocab)
+        self._tags = ['*'] + list(self._tag_counts.keys())
 
     def _find_tag_viterbi(self, input):
         """Implementation of Viterbi Algorithm to find out pos tags of input"""
@@ -149,3 +151,8 @@ class POSTagger():
                 prevtag1 = tag
         ## DONE with counts creation
 
+    def __str__(self):
+        print('tag counts: ', self._tag_counts)
+        print('tag bigram counts: ', self._tag_bigram_counts)
+        print('tag trigram counts: ', self._tag_trigram_counts)
+        print('word tag counts: ', self._word_tag_counts)
