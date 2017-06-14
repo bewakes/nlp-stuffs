@@ -7,7 +7,7 @@ from itertools import product
 ##
 ######################################################################
 
-STOP = '$'
+STOP = '.'
 PAUSE = ','
 
 class POSTagger():
@@ -18,18 +18,20 @@ class POSTagger():
         - vocab: this is probably generated from corpus
         - corpus: list of (word, tag) pairs (hopefully)
         """
-        #self._tags = ['*'] + tagslist
         self._vocab = vocab
         self._corpus = corpus
-        self._tag_bigrams = list(product(self._tags, self._tags))
 
         self._tag_counts = {}
         self._word_tag_counts = {}
         self._tag_trigram_counts = {}
         self._tag_bigram_counts = {}
         # create a probability distribution
-        self._update_counts(vocab)
+        self._update_counts(corpus)
+
+        # update other params
         self._tags = ['*'] + list(self._tag_counts.keys())
+        self._tag_bigrams = list(product(self._tags, self._tags))
+        self._vocab = list(self._word_tag_counts.keys())
 
     def _find_tag_viterbi(self, input):
         """Implementation of Viterbi Algorithm to find out pos tags of input"""
@@ -60,26 +62,26 @@ class POSTagger():
 
         input:  is a list
         """
-        pi_list = [1 if x==('*','*') else 0 for x in self._tag_bigrams] # initialization
+        pi_list = [[1 if x==('*','*') else 0 for x in self._tag_bigrams]] # initialization
 
         tag_seq = [0 for _ in input] + [0] # one extra because of initial *, which will later be discarded
 
         for i, word in enumerate(input):
             new_pi = [] # stores new values for pi, and is appended to pi_list
-            for tag_bigram in self._tag_bigrams:
+            for k, tag_bigram in enumerate(self._tag_bigrams):
                 u,v = tag_bigram
                 mx = 0
                 for j, tag_bigrm in enumerate(self._tag_bigrams):
                     w, U = tag_bigrm
                     if u == U:
-                        prob = pi_list[i]* _e(word, v) * _q(v, w, u)
+                        prob = pi_list[i][j]* self._e(word, v) * self._q(v, w, u)
                         if prob>mx:
                             tag_seq[i] = j
                             mx=prob
                 new_pi.append(mx)
             pi_list.append(new_pi)
 
-        last_pi_list = list(map(lambda x: x* _q(STOP, u, v), pi_list[-1]))
+        last_pi_list = list(map(lambda x: x* self._q(STOP, u, v), pi_list[-1]))
 
         mx = max(last_pi_list)
         tag_seq[-1] = last_pi_list.index(mx)
@@ -87,19 +89,19 @@ class POSTagger():
         return list(map(lambda x: self._tag_bigrams[1], tag_seq))
 
 
-    def _q(tag, tag1, tag2):
+    def _q(self, tag, tag1, tag2):
         """
         naive implementation, later can be made efficient using other DS
         returns probability of occuring 'tag' given tag1 and tag2 occur sequentially
         """
-        return _count3(tag1, tag2, tag)/_count2(tag1,tag2)
+        return self._count3(tag1, tag2, tag)/self._count2(tag1,tag2)
 
-    def _e(word, tag):
+    def _e(self, word, tag):
         """
         returns probability of occurence of 'word' given 'tag'
         """
         # _count(tag, word) is the number of occurences of tag and word together
-        return _count(tag, word) / _count0(tag)
+        return self._count(tag, word) / self._count0(tag)
 
     # TODO: implement _count0, _count, _count2 and count3
     def _count0(self, tag):
@@ -112,7 +114,7 @@ class POSTagger():
         return self._tag_bigram_counts.get(tag1, {}).get(tag2,1) # LETS NOT keep this zero, as it is denominator
 
     def _count3(self, tag1, tag2, tag):
-        return self._tag_bigram.get(tag1, {}).get(tag2, {}).get(tag,0)
+        return self._tag_trigram_counts.get(tag1, {}).get(tag2, {}).get(tag,0)
 
 
     def _update_counts(self, vocab):
@@ -143,7 +145,7 @@ class POSTagger():
             prev2tag_trigrm[prevtag1] = dict(prev1tag_bigrm)
             self._tag_trigram_counts[prevtag2] = dict(prev2tag_trigrm)
             # update prevtag2 and prevtag1
-            if tag == '$': # $ for stop
+            if tag == '.': # . for stop
                 ## reset prevtag1 and prevtag2
                 prevtag1 = prevtag2 = "*"
             else:
@@ -152,7 +154,6 @@ class POSTagger():
         ## DONE with counts creation
 
     def __str__(self):
-        print('tag counts: ', self._tag_counts)
-        print('tag bigram counts: ', self._tag_bigram_counts)
-        print('tag trigram counts: ', self._tag_trigram_counts)
-        print('word tag counts: ', self._word_tag_counts)
+        print(self._vocab)
+        return 'tag counts: {}\ntag bigram counts: {}\ntag trigram counts: {}\nword tag counts: {}'.\
+                format(self._tag_counts, self._tag_bigram_counts, self._tag_trigram_counts, self._word_tag_counts)
