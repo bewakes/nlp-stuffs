@@ -32,7 +32,7 @@ depthFirstList EmptyTree = []
 depthFirstList (Node val EmptyTree EmptyTree) = [val]
 depthFirstList (Node val left right) = depthFirstList left ++ [val] ++  depthFirstList right
 
-nums = [16,8,5,4,2,9,7,10,24,14,12]
+nums = [16,8,5,4,2,9,7,10,24,14,1]
 tree :: Tree Int
 tree = foldr treeInsert EmptyTree nums
 
